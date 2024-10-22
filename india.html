@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -46,7 +46,6 @@
           ></a-text>
         </a-entity>
 
-        <!-- Monuments will be dynamically placed here -->
         <a-entity id="monument1" class="clickable"></a-entity>
         <a-entity id="monument2" class="clickable"></a-entity>
         <a-entity id="monument3" class="clickable"></a-entity>
@@ -109,20 +108,131 @@
         for (let i = 0; i < distances.length; i++) {
           const latOffset = lat + distances[i];
           const lonOffset =
-            lon + distances[i] / (111320 * Math.cos(lat * (Math.PI / 180))); // Approx. 1 meter in longitude
+            lon + distances[i] / (111320 * Math.cos(lat * (Math.PI / 180))); 
 
           const monumentEntity = document.getElementById("monument" + (i + 1));
-          monumentEntity.setAttribute("gltf-model", monumentModels[i]); // Change this to glb-model
+          monumentEntity.setAttribute("gltf-model", monumentModels[i]); 
           monumentEntity.setAttribute(
             "gps-entity-place",
             `latitude: ${latOffset}; longitude: ${lonOffset};`
           );
           monumentEntity.setAttribute("scale", "2 2 2");
-
-          // Add click interaction for mobile
           monumentEntity.addEventListener("click", () => showInfoBox(i));
         }
       }
+
+      function showInfoBox(index) {
+        const infoBox = document.getElementById("infoBox");
+        const infoText = document.getElementById("infoText");
+        infoText.setAttribute(
+          "value",
+          `${monumentInfo[index].name}: ${monumentInfo[index].description}`
+        );
+        infoBox.setAttribute("visible", true);
+      }
+      document.addEventListener("click", (event) => {
+        const infoBox = document.getElementById("infoBox");
+        const isClickInside =
+          infoBox.getAttribute("visible") && infoBox.el.contains(event.target);
+
+        if (!isClickInside) {
+          infoBox.setAttribute("visible", false);
+        }
+      });
+    </script>
+  </body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monument Tour with AR</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <!-- Camera for the AR scene -->
+        <a-entity camera position="0 1.6 0" <!-- Standard camera height -->
+          raycaster="objects: .clickable" ></a-entity
+        >
+
+        <a-entity
+          id="infoBox"
+          visible="false"
+          position="0 1.8 -1.5"
+          scale="2 2 2"
+        >
+          <a-plane color="#fff" width="2" height="1.5"></a-plane>
+          <a-text
+            id="infoText"
+            value="Info about Monument"
+            color="#000"
+            align="center"
+            position="0 0.5 0"
+          ></a-text>
+        </a-entity>
+
+        <!-- Monument 1: Taj Mahal (Positioned 2 meters in front of the camera) -->
+        <a-entity
+          id="monument1"
+          class="clickable"
+          gltf-model="url(assets/india/taj_mahal.glb)"
+          scale="2 2 2"
+          position="0 0 -2"
+        ></a-entity>
+
+        <!-- Monument 2: Charminar (Positioned 2 meters to the right of the camera) -->
+        <a-entity
+          id="monument2"
+          class="clickable"
+          gltf-model="url(assets/india/charminar.glb)"
+          scale="2 2 2"
+          position="2 0 -2"
+        ></a-entity>
+
+        <!-- Monument 3: Sanchi Stupa (Positioned 2 meters to the left of the camera) -->
+        <a-entity
+          id="monument3"
+          class="clickable"
+          gltf-model="url(assets/india/great_stupa_in_sanchi.glb)"
+          scale="2 2 2"
+          position="-2 0 -2"
+        ></a-entity>
+      </a-scene>
+    </div>
+
+    <script>
+      const monumentInfo = [
+        {
+          name: "Taj Mahal",
+          description:
+            "The Taj Mahal is an ivory-white marble mausoleum located in Agra, India...",
+        },
+        {
+          name: "Charminar",
+          description:
+            "Charminar is a historical mosque and monument located in Hyderabad, India...",
+        },
+        {
+          name: "Sanchi Stupa",
+          description:
+            "The Sanchi Stupa is a Buddhist monument located in Madhya Pradesh, India...",
+        },
+      ];
 
       function showInfoBox(index) {
         const infoBox = document.getElementById("infoBox");
@@ -137,6 +247,17 @@
         // Make the info box visible
         infoBox.setAttribute("visible", true);
       }
+
+      // Add click event listeners to the monuments
+      document
+        .getElementById("monument1")
+        .addEventListener("click", () => showInfoBox(0));
+      document
+        .getElementById("monument2")
+        .addEventListener("click", () => showInfoBox(1));
+      document
+        .getElementById("monument3")
+        .addEventListener("click", () => showInfoBox(2));
 
       // Hide the info box when clicking outside of it
       document.addEventListener("click", (event) => {

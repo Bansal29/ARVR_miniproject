@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -141,4 +141,89 @@
       });
     </script>
   </body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Markerless AR - Taj Mahal</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.0/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-ar-hit-test@1.2.0/dist/aframe-ar-hit-test.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <!-- AR Scene -->
+      <a-scene
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true;"
+        xrweb="optionalFeatures: hit-test;"
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        embedded
+      >
+        <!-- Camera and AR Hit Test -->
+        <a-entity camera position="0 1.6 0"></a-entity>
+        <a-entity
+          id="tajMahal"
+          gltf-model="url(assets/india/taj_mahal.glb)"
+          scale="0.2 0.2 0.2"
+          visible="false"
+        ></a-entity>
+
+        <!-- Ground Plane where the model will be placed -->
+        <a-plane
+          id="ground"
+          rotation="-90 0 0"
+          position="0 0 0"
+          width="100"
+          height="100"
+          color="#cccccc"
+        ></a-plane>
+      </a-scene>
+    </div>
+
+    <script>
+      AFRAME.registerComponent("place-on-plane", {
+        init: function () {
+          const tajMahal = document.querySelector("#tajMahal");
+          const scene = this.el.sceneEl;
+
+          scene.addEventListener("ar-hit-test-start", function () {
+            console.log("Hit test started");
+          });
+
+          // Handle the AR Hit Test Results
+          scene.addEventListener("ar-hit-test", function (event) {
+            const hits = event.detail.intersections;
+            if (hits.length > 0) {
+              const hitPoint = hits[0].point;
+              tajMahal.setAttribute("position", hitPoint);
+              tajMahal.setAttribute("visible", true); // Show the model when hit detected
+            }
+          });
+        },
+      });
+
+      // Apply the component to the scene
+      document.querySelector("a-scene").setAttribute("place-on-plane", "");
+    </script>
+  </body>
 </html>
+
+<!-- erros encountered
+ 1. objects are not being rendered properly
+ 2. Myabe GPS thing location-based AR not working properly
+ 3. Click function not checked
+ 4. Raycasting concept understood -->

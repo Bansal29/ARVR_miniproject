@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monument Tour with AR for EGYPT</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <a-scene
+        embedded
+        arjs="sourceType: webcam; locationEnabled: true; debugUIEnabled: true;"
+      >
+        <a-entity
+          camera
+          gps-camera
+          rotation-reader
+          raycaster="objects: .clickable"
+        ></a-entity>
+
+        <a-entity
+          id="infoBox"
+          visible="false"
+          position="0 1.8 -3"
+          scale="2 2 2"
+        >
+          <a-plane color="#fff" width="2" height="1.5"></a-plane>
+          <a-text
+            id="infoText"
+            value="Info about Monument"
+            color="#000"
+            align="center"
+            position="0 0.5 0"
+          ></a-text>
+        </a-entity>
+
+        <!-- Monuments will be dynamically placed here -->
+        <a-entity id="monument1" class="clickable"></a-entity>
+        <a-entity id="monument2" class="clickable"></a-entity>
+        <a-entity id="monument3" class="clickable"></a-entity>
+      </a-scene>
+    </div>
+
+    <script>
+      const distances = [0, 0.000045]; // Approx. 5 meters apart
+      const monumentModels = [
+        "url(assets/egypt/plateau_de_gizeh.glb)",
+        "url(assets/egypt/plateau_de_gizeh.glb)",
+      ];
+
+      const monumentInfo = [
+        {
+          name: "Great Pyramid of Giza",
+          description:
+            "The Great Pyramid of Giza is the largest of the three pyramids located in the Giza pyramid complex in Egypt. It was built during the reign of the Pharaoh Khufu around 2560 BCE and is considered one of the Seven Wonders of the Ancient World. The pyramid originally stood at 146.6 meters (481 feet), and its precise engineering remains a subject of study and admiration. Despite millennia of erosion, it continues to be a symbol of Egypt's architectural and cultural prowess.",
+        },
+      ];
+
+      function requestLocationPermission() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(onSuccess, onError);
+        } else {
+          console.error("Geolocation is not supported by this browser.");
+        }
+      }
+
+      function onSuccess(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Log the current position
+        console.log(`Current Latitude: ${latitude}`);
+        console.log(`Current Longitude: ${longitude}`);
+
+        // Place monuments dynamically based on position
+        placeMonuments(latitude, longitude);
+      }
+
+      function onError(error) {
+        console.error("Error getting location:", error);
+      }
+
+      window.addEventListener("load", requestLocationPermission);
+
+      function placeMonuments(lat, lon) {
+        for (let i = 0; i < distances.length; i++) {
+          const latOffset = lat + distances[i];
+          const lonOffset =
+            lon + distances[i] / (111320 * Math.cos(lat * (Math.PI / 180))); // Approx. 1 meter in longitude
+
+          const monumentEntity = document.getElementById("monument" + (i + 1));
+          monumentEntity.setAttribute("gltf-model", monumentModels[i]); // Change this to glb-model
+          monumentEntity.setAttribute(
+            "gps-entity-place",
+            `latitude: ${latOffset}; longitude: ${lonOffset};`
+          );
+          monumentEntity.setAttribute("scale", "2 2 2");
+
+          // Add click interaction for mobile
+          monumentEntity.addEventListener("click", () => showInfoBox(i));
+        }
+      }
+
+      function showInfoBox(index) {
+        const infoBox = document.getElementById("infoBox");
+        const infoText = document.getElementById("infoText");
+
+        // Update the info box content with monument details
+        infoText.setAttribute(
+          "value",
+          `${monumentInfo[index].name}: ${monumentInfo[index].description}`
+        );
+
+        // Make the info box visible
+        infoBox.setAttribute("visible", true);
+      }
+
+      // Hide the info box when clicking outside of it
+      document.addEventListener("click", (event) => {
+        const infoBox = document.getElementById("infoBox");
+        const isClickInside =
+          infoBox.getAttribute("visible") && infoBox.el.contains(event.target);
+
+        if (!isClickInside) {
+          infoBox.setAttribute("visible", false);
+        }
+      });
+    </script>
+  </body>
+</html>

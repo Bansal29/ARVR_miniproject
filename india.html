@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monument Tour with AR for INDIA</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <a-scene
+        embedded
+        arjs="sourceType: webcam; locationEnabled: true; debugUIEnabled: true;"
+      >
+        <a-entity
+          camera
+          gps-camera
+          rotation-reader
+          raycaster="objects: .clickable"
+        ></a-entity>
+
+        <a-entity
+          id="infoBox"
+          visible="false"
+          position="0 1.8 -3"
+          scale="2 2 2"
+        >
+          <a-plane color="#fff" width="2" height="1.5"></a-plane>
+          <a-text
+            id="infoText"
+            value="Info about Monument"
+            color="#000"
+            align="center"
+            position="0 0.5 0"
+          ></a-text>
+        </a-entity>
+
+        <!-- Monuments will be dynamically placed here -->
+        <a-entity id="monument1" class="clickable"></a-entity>
+        <a-entity id="monument2" class="clickable"></a-entity>
+        <a-entity id="monument3" class="clickable"></a-entity>
+      </a-scene>
+    </div>
+
+    <script>
+      const distances = [0, 0.000045, 0.00009]; // Approx. 5 meters apart
+      const monumentModels = [
+        "url(assets/india/taj_mahal.glb)",
+        "url(assets/india/charminar.glb)",
+        "url(assets/india/great_stupa_in_sanchi.glb)",
+      ];
+
+      const monumentInfo = [
+        {
+          name: "Taj Mahal",
+          description:
+            "The Taj Mahal is an ivory-white marble mausoleum located in Agra, India. Built by the Mughal emperor Shah Jahan in memory of his beloved wife Mumtaz Mahal, it is often regarded as the finest example of Mughal architecture. The monument combines elements of Islamic, Persian, and Indian architectural styles, and its pristine white marble is a symbol of eternal love. The Taj Mahal is also a UNESCO World Heritage Site, attracting millions of visitors every year.",
+        },
+        {
+          name: "Charminar",
+          description:
+            "Charminar is a historical mosque and monument located in Hyderabad, India. Built in 1591 by Muhammad Quli Qutb Shah, it commemorates the founding of Hyderabad and marks the end of a plague that devastated the region. The structure features four grand minarets, each 56 meters tall, giving it its name 'Charminar,' meaning 'Four Towers.' It is an outstanding example of Indo-Islamic architecture with Persian influences. The monument stands at the heart of Hyderabad's bustling old city, surrounded by bazaars and cultural landmarks.",
+        },
+        {
+          name: "Sanchi Stupa",
+          description:
+            "The Sanchi Stupa is a Buddhist monument located in Madhya Pradesh, India. Built during the reign of Emperor Ashoka in the 3rd century BCE, the stupa is one of the oldest stone structures in India. It is a large hemispherical dome containing relics of the Buddha. The Stupa has intricate carvings depicting important scenes from Buddha's life and teachings. The site is now a UNESCO World Heritage Site and attracts visitors from all over the world due to its historical significance and architectural splendor.",
+        },
+      ];
+
+      function requestLocationPermission() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(onSuccess, onError);
+        } else {
+          console.error("Geolocation is not supported by this browser.");
+        }
+      }
+
+      function onSuccess(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Log the current position
+        console.log(`Current Latitude: ${latitude}`);
+        console.log(`Current Longitude: ${longitude}`);
+
+        // Place monuments dynamically based on position
+        placeMonuments(latitude, longitude);
+      }
+
+      function onError(error) {
+        console.error("Error getting location:", error);
+      }
+
+      window.addEventListener("load", requestLocationPermission);
+
+      function placeMonuments(lat, lon) {
+        for (let i = 0; i < distances.length; i++) {
+          const latOffset = lat + distances[i];
+          const lonOffset =
+            lon + distances[i] / (111320 * Math.cos(lat * (Math.PI / 180))); // Approx. 1 meter in longitude
+
+          const monumentEntity = document.getElementById("monument" + (i + 1));
+          monumentEntity.setAttribute("gltf-model", monumentModels[i]); // Change this to glb-model
+          monumentEntity.setAttribute(
+            "gps-entity-place",
+            `latitude: ${latOffset}; longitude: ${lonOffset};`
+          );
+          monumentEntity.setAttribute("scale", "2 2 2");
+
+          // Add click interaction for mobile
+          monumentEntity.addEventListener("click", () => showInfoBox(i));
+        }
+      }
+
+      function showInfoBox(index) {
+        const infoBox = document.getElementById("infoBox");
+        const infoText = document.getElementById("infoText");
+
+        // Update the info box content with monument details
+        infoText.setAttribute(
+          "value",
+          `${monumentInfo[index].name}: ${monumentInfo[index].description}`
+        );
+
+        // Make the info box visible
+        infoBox.setAttribute("visible", true);
+      }
+
+      // Hide the info box when clicking outside of it
+      document.addEventListener("click", (event) => {
+        const infoBox = document.getElementById("infoBox");
+        const isClickInside =
+          infoBox.getAttribute("visible") && infoBox.el.contains(event.target);
+
+        if (!isClickInside) {
+          infoBox.setAttribute("visible", false);
+        }
+      });
+    </script>
+  </body>
+</html>

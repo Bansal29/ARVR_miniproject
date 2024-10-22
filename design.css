@@ -1,0 +1,35 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+}
+
+.coordinates {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 999; /* Ensure it's on top */
+}
+
+a-scene {
+  height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+}
+
+#infoBox {
+  position: absolute; /* Position relative to the scene */
+  z-index: 10; /* Ensure it is above other elements */
+}
+
+a-plane {
+  border: 1px solid #ccc; /* Add a border to the info box */
+}
+
+a-text {
+  font-size: 0.5; /* Adjust font size for better visibility */
+  width: 2.5; /* Adjust width to fit text */
+}

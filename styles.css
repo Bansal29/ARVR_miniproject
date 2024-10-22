@@ -1,0 +1,127 @@
+/* body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.container {
+  max-width: 600px;
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  margin-bottom: 20px;
+  font-size: 2em;
+}
+
+.country-selection {
+  display: flex;
+  justify-content: space-between;
+}
+
+.country-button {
+  padding: 15px 30px;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.country-button:hover {
+  background-color: #2980b9;
+} */
+/* Set body background and overall styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("https://images.unsplash.com/photo-1529429613446-8fbb9a9e1120?ixlib=rb-1.2.1&auto=format&fit=crop&w=1470&q=80");
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+}
+
+.container {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  font-weight: 300;
+}
+
+/* Styling for the country buttons */
+.country-selection {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.country-button {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #333;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.country-button:hover {
+  background-color: #f9b334;
+  color: white;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive design for mobile */
+@media screen and (max-width: 768px) {
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+
+  .country-selection {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .country-button {
+    font-size: 1rem;
+    padding: 12px 25px;
+  }
+}

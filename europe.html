@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monument Tour with AR for EUROPE</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <a-scene
+        embedded
+        arjs="sourceType: webcam; locationEnabled: true; debugUIEnabled: true;"
+      >
+        <a-entity
+          camera
+          gps-camera
+          rotation-reader
+          raycaster="objects: .clickable"
+        ></a-entity>
+
+        <a-entity
+          id="infoBox"
+          visible="false"
+          position="0 1.8 -3"
+          scale="2 2 2"
+        >
+          <a-plane color="#fff" width="2" height="1.5"></a-plane>
+          <a-text
+            id="infoText"
+            value="Info about Monument"
+            color="#000"
+            align="center"
+            position="0 0.5 0"
+          ></a-text>
+        </a-entity>
+
+        <!-- Monuments will be dynamically placed here -->
+        <a-entity id="monument1" class="clickable"></a-entity>
+        <a-entity id="monument2" class="clickable"></a-entity>
+        <a-entity id="monument3" class="clickable"></a-entity>
+      </a-scene>
+    </div>
+
+    <script>
+      const distances = [0, 0.000045, 0.00009, 0.000135, 0.00018]; // Approx. 5 meters apart for each monument
+      const monumentModels = [
+        "url(assets/europe/eiffel_tower.glb)",
+        "url(assets/europe/clock_tower_big_ben.glb)",
+        "url(assets/europe/stonehenge_england_-_vr.glb)",
+      ];
+
+      const monumentInfo = [
+        {
+          name: "Eiffel Tower",
+          description:
+            "The Eiffel Tower is an iconic iron lattice tower located on the Champ de Mars in Paris, France. It was completed in 1889 and named after its engineer, Gustave Eiffel. Standing at 330 meters tall, it was the tallest man-made structure in the world for 41 years. Today, it remains a global cultural icon of France and one of the most recognizable structures in the world.",
+        },
+        {
+          name: "Big Ben",
+          description:
+            "Big Ben is the nickname for the Great Bell of the clock at the north end of the Palace of Westminster in London, England. The tower itself is known as Elizabeth Tower. It was completed in 1859 and is one of the most prominent symbols of the United Kingdom. Big Ben's clock face is famously accurate, and its chimes can be heard across London.",
+        },
+        {
+          name: "Stonehenge",
+          description:
+            "Stonehenge is a prehistoric monument located in Wiltshire, England. It consists of a ring of standing stones, each around 4 meters tall, 2 meters wide, and weighing approximately 25 tons. It is believed to have been constructed between 3000 BC and 2000 BC. Stonehenge's original purpose remains a mystery, but it is thought to have been used as a ceremonial or religious site.",
+        },
+      ];
+
+      function requestLocationPermission() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(onSuccess, onError);
+        } else {
+          console.error("Geolocation is not supported by this browser.");
+        }
+      }
+
+      function onSuccess(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Log the current position
+        console.log(`Current Latitude: ${latitude}`);
+        console.log(`Current Longitude: ${longitude}`);
+
+        // Place monuments dynamically based on position
+        placeMonuments(latitude, longitude);
+      }
+
+      function onError(error) {
+        console.error("Error getting location:", error);
+      }
+
+      window.addEventListener("load", requestLocationPermission);
+
+      function placeMonuments(lat, lon) {
+        for (let i = 0; i < distances.length; i++) {
+          const latOffset = lat + distances[i];
+          const lonOffset =
+            lon + distances[i] / (111320 * Math.cos(lat * (Math.PI / 180))); // Approx. 1 meter in longitude
+
+          const monumentEntity = document.getElementById("monument" + (i + 1));
+          monumentEntity.setAttribute("gltf-model", monumentModels[i]); // Change this to glb-model
+          monumentEntity.setAttribute(
+            "gps-entity-place",
+            `latitude: ${latOffset}; longitude: ${lonOffset};`
+          );
+          monumentEntity.setAttribute("scale", "2 2 2");
+
+          // Add click interaction for mobile
+          monumentEntity.addEventListener("click", () => showInfoBox(i));
+        }
+      }
+
+      function showInfoBox(index) {
+        const infoBox = document.getElementById("infoBox");
+        const infoText = document.getElementById("infoText");
+
+        // Update the info box content with monument details
+        infoText.setAttribute(
+          "value",
+          `${monumentInfo[index].name}: ${monumentInfo[index].description}`
+        );
+
+        // Make the info box visible
+        infoBox.setAttribute("visible", true);
+      }
+
+      // Hide the info box when clicking outside of it
+      document.addEventListener("click", (event) => {
+        const infoBox = document.getElementById("infoBox");
+        const isClickInside =
+          infoBox.getAttribute("visible") && infoBox.el.contains(event.target);
+
+        if (!isClickInside) {
+          infoBox.setAttribute("visible", false);
+        }
+      });
+    </script>
+  </body>
+</html>
